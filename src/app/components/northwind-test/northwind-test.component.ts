@@ -87,20 +87,19 @@ export class NorthwindTestComponent implements OnInit {
           header: 'Hàng hóa',
           binding: 'freight',
           width: '*',
-          format: 'n0'
+          format: 'n1'
         },
       ],
       class: 'class-order'
     },
     {
-      title: 'detail',
+      title: dataType.OrderDetail,
       source: [],
       column: [
         {
           header: 'Id',
           binding: 'orderId',
           width: 125,
-          format: 'd'
         },
         {
           header: 'Mã SP',
