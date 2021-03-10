@@ -1,0 +1,21 @@
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+.wj-flexgrid {
+  .wj-cell {
+    padding: 8px !important;
+  }
+  .wj-state-sticky {
+    .wj-header {
+      opacity: 1;
+    }
+  }
+}
+.blue {
+  background-color: aqua !important;
+}

@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="filter-container">
+        <wj-flex-grid #gridCity [itemsSource]="citiesData" [stickyHeaders]="true" (initialized)="initialized('city')"
+            [allowSorting]="true" class="grid">
+        </wj-flex-grid>
+    </div>
+    <div class="table-container">
+        <div class="customers-container">
+            <wj-flex-grid #gridCusomter [itemsSource]="customersData" [stickyHeaders]="true"
+                (initialized)="initialized('customer')" [allowSorting]="true" class="grid">
+            </wj-flex-grid>
+        </div>
+        <div class="panel">
+            <div class="orders-container">
+                <wj-flex-grid #gridOrders [itemsSource]="ordersData" [stickyHeaders]="true"
+                    (initialized)="initialized('order')" [allowSorting]="true" class="grid">
+                </wj-flex-grid>
+            </div>
+            <div class="order-detail-container">
+                <wj-flex-grid #gridOrderDetail [itemsSource]="orderDetailData" [stickyHeaders]="true"
+                    (initialized)="initialized('detail')" [allowSorting]="true" class="grid">
+                </wj-flex-grid>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="north-container">
+    <div *ngFor="let grid of listGrid" [class]="grid.class">
+        <wj-flex-grid #dgrid [itemsSource]="grid.source" [stickyHeaders]="true" [allowSorting]="false"
+            [allowResizing]="0" [isReadOnly]="true" [headersVisibility]="1" [columnGroups]="grid.column"
+            (initialized)="initialized(dgrid, grid.title)">
+        </wj-flex-grid>
+    </div>
+</div>

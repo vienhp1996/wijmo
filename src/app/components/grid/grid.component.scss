@@ -1,0 +1,55 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  height: 97vh;
+  .left-container {
+    display: grid;
+    grid-template-rows: 20% 80%;
+    margin-right: 5px;
+    .first-row {
+      display: grid;
+      grid-gap: 5px;
+      grid-template-columns: repeat(10, 10%);
+      margin-bottom: 5px;
+    }
+    .second-row {
+      display: grid;
+      grid-gap: 5px;
+      grid-template-columns: 50% 50%;
+    }
+    .aqua {
+      background-color: aqua;
+    }
+    .red {
+      background-color: red;
+    }
+    .yellow {
+      background-color: yellow;
+    }
+    .green {
+      background-color: green;
+    }
+  }
+  .right-container {
+    display: grid;
+    grid-template-rows: 30% 40% 30%;
+    .first {
+      background-color: red;
+    }
+    .second {
+      background-color: pink;
+    }
+    .third {
+      background-color: powderblue;
+    }
+  }
+  .mr-5 {
+    margin-right: 5px;
+  }
+  .mb-5 {
+    margin-bottom: 5px;
+  }
+  .ml-5 {
+    margin-left: 5px;
+  }
+}

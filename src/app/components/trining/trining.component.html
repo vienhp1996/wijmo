@@ -1,0 +1,185 @@
+<div class="container">
+    <div class="filter-container">
+        <div class="filter__tittle">
+            <h4>Lọc dữ liệu</h4>
+        </div>
+        <div class="filter__list-checkbox">
+            <form novalidate (ngSubmit)="onSubmit()" [formGroup]="rfFilter">
+                <app-list-check-box formControlName="types"></app-list-check-box>
+                <div>
+                    <label for="description">Mô tả</label>
+                    <input type="text" id="description" formControlName="description" />
+                </div>
+
+                <div>
+                    <label for="totalmoney">Tiền hàng</label>
+                    <input type="text" id="totalmoney" formControlName="totalmoney" />
+                    <div *ngIf="rfFilter.controls.totalmoney?.errors" class="errors">
+                        {{ rfFilter.controls.totalmoney?.errors?.message }}
+                    </div>
+                </div>
+                <button type="submit" [disabled]="!rfFilter.valid">
+                    Lọc
+                </button>
+                <div>
+                    <label>Page Size</label>
+                    <select (change)="changePageItem($event.target.value)">
+                        <option *ngFor="let item of listPageSize" [value]="item" [selected]="item == data.pageSize">
+                            {{item}}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label>Total {{data._view.length}} items</label>
+                    <div class="pagination">
+                        <button (click)="goPreviousItem()">❮</button>
+                        <button (click)="goNextItem()">❯</button>
+                    </div>
+                </div>
+                <div>
+                    <label>page {{data.pageIndex + 1}} of {{data.pageCount}}</label>
+                    <div class="pagination">
+                        <button (click)="goPreviousPage()">❮</button>
+                        <button (click)="goNextPage()">❯</button>
+                    </div>
+                </div>
+                <div>
+                    <button (click)="openPopup()">Add New</button>
+                    <button (click)="showHistory()">History</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div class="table-container">
+        <!-- <table>
+      <thead>
+        <tr>
+          <th
+            *ngFor="let column of listColumns"
+            [ngClass]="{
+              'min-width-150px': column.value === Description
+            }"
+          >
+            {{ column.title }}
+            <span
+              (click)="handleClickIcon(column)"
+              class="sortArrow"
+              [ngClass]="{
+                'color-black': column.isSorted === false,
+                'color-red': column.isSorted === true
+              }"
+              *ngIf="column.sort === 1"
+              >{{ column.sortType === "desc" ? "▼" : "▲" }}</span
+            >
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of data">
+          <td
+            *ngFor="let column of listColumns"
+            [ngClass]="{
+              'text-right': column.type === 'number',
+              'text-left': column.type === 'string',
+              'text-center': column.type === 'date'
+            }"
+          >
+            <div
+              *ngIf="
+                column.value !== 'TotalOriginalAmount' &&
+                column.value !== 'DocDate'
+              "
+              [innerHTML]="item[column.value] | highlight: zSearchTerm"
+            ></div>
+            <span *ngIf="column.value === 'TotalOriginalAmount'">{{
+              item[column.value] | formatDataPipe: 1
+            }}</span>
+            <span *ngIf="column.value === 'DocDate'">{{
+              item[column.value] | formatDataPipe: 2
+            }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table> -->
+
+        <wj-flex-grid #flex [itemsSource]="data" [stickyHeaders]="true" (initialized)="initializeGrid(flex)"
+            [allowSorting]="allowSorting" class="grid" [allowDelete]="true">
+            <ng-template wjFlexGridCellTemplate [cellType]="'RowHeader'" let-cell="cell">
+                {{cell.row.index + 1}}
+            </ng-template>
+            <ng-template wjFlexGridCellTemplate [cellType]="'TopLeft'">
+                <span class="wj-glyph-down-right"></span>
+            </ng-template>
+            <ng-template wjFlexGridCellTemplate [cellType]="'BottomLeft'">
+                &#931;
+            </ng-template>
+            <wj-flex-grid-column *ngFor="let col of listColumns" [binding]="col.value" [header]="col.title"
+                [width]="col.size" [isReadOnly]="true">
+                <ng-template wjFlexGridCellTemplate [cellType]="'ColumnHeader'" let-cell="cell">
+                    {{cell.col.header}} -
+                </ng-template>
+                <div *ngIf="col.hasSum">
+                    <ng-template wjFlexGridCellTemplate [cellType]="'ColumnFooter'" let-cell="cell">
+                        {{nTotalMoney | number}}
+                    </ng-template>
+                </div>
+            </wj-flex-grid-column>
+        </wj-flex-grid>
+        <div class="panel">
+            <div *ngFor="let item of listColumns">
+                <label [for]="item.value">{{item.title}}</label>
+                <wj-combo-box #combobox *ngIf="item.value !== 'TotalOriginalAmount' && item.value !== 'DocDate'"
+                    [id]="item.value" [name]="item.value" [text]="displayItem(item.value)"
+                    (lostFocus)="editItem(combobox, item.value)">
+                </wj-combo-box>
+                <wj-input-number #number *ngIf="item.value === 'TotalOriginalAmount'" [id]="item.value"
+                    [name]="item.value" [format]="'n2'" [value]="displayItem(item.value)"
+                    (lostFocus)="editItem(number, item.value)">
+                </wj-input-number>
+                <wj-input-date #date *ngIf="item.value === 'DocDate'" [id]="item.value" [name]="item.value"
+                    [value]="displayItem(item.value)" (lostFocus)="editItem(date, item.value)"></wj-input-date>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- the popup editor -->
+<wj-popup #popup class="modal-content">
+    <div class="modal-header">
+        <button type="button" tabindex="-1" class="close wj-hide">
+            &times;
+        </button>
+        <h4 class="modal-title">Add Item</h4>
+    </div>
+    <div class="modal-body">
+        <div class="wj-labeled-input">
+            <wj-combo-box #docNo [isRequired]="false">
+            </wj-combo-box>
+            <label for="number">Số</label>
+        </div>
+        <div class="wj-labeled-input">
+            <wj-input-date #docDate></wj-input-date>
+            <label for="sales">Ngày</label>
+        </div>
+        <div class="wj-labeled-input">
+            <wj-combo-box #description [isRequired]="false">
+            </wj-combo-box>
+            <label for="sales">Mô tả</label>
+        </div>
+        <div class="wj-labeled-input">
+            <wj-combo-box #customerName [isRequired]="false">
+            </wj-combo-box>
+            <label for="sales">Nhà cung cấp</label>
+        </div>
+        <div class="wj-labeled-input">
+            <wj-input-number #totalOriginalAmount [format]="'n2'" [step]="100">
+            </wj-input-number>
+            <label for="sales">Tiền hàng</label>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary wj-hide-ok">Save</button>
+            <button type="button" class="btn btn-default wj-hide">Cancel</button>
+        </div>
+    </div>
+</wj-popup>

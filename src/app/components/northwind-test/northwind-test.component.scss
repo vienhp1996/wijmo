@@ -1,0 +1,30 @@
+.north-container {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  grid-template-rows: 1fr 1fr;
+  .class-city {
+    grid-column: 1;
+    grid-row: 1/3;
+    height: 100%;
+    display: flex;
+  }
+  .class-customer {
+    grid-column: 2/4;
+    grid-row: 1/2;
+    overflow: auto;
+    display: flex;
+  }
+  .class-order {
+    grid-column: 2;
+    grid-row: 2/3;
+    overflow: auto;
+    display: flex;
+  }
+  .class-detail {
+    grid-column: 3;
+    grid-row: 2/3;
+    overflow: auto;
+    display: flex;
+  }
+}

@@ -1,0 +1,8 @@
+<div *ngFor="let item of listCheckbox; let i = index">
+  <label for="{{ item.name }}"> {{ item.title }}</label>
+  <input
+    type="checkbox"
+    id="{{ item.name }}"
+    (change)="onChanged(item.id, $event)"
+  />
+</div>
