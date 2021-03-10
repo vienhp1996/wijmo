@@ -228,7 +228,6 @@ export class NorthwindTestComponent implements OnInit {
 
   ngOnDestroy(): void {
     this.callingApi.unsubscribe();
-    this.dgrid.removeEventListener();
   }
 
 }
