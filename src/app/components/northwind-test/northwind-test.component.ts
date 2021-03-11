@@ -24,7 +24,14 @@ export class NorthwindTestComponent implements OnInit {
           width: '*'
         }
       ],
-      class: 'class-city'
+      class: 'class-city',
+      properties: {
+        allowResizing: 0,
+        isReadOnly: true,
+        headersVisibility: 1,
+        autoGenerateColumns: false,
+        allowSorting: false
+      }
     },
     {
       title: dataType.Customer,
@@ -62,7 +69,14 @@ export class NorthwindTestComponent implements OnInit {
           width: 150
         }
       ],
-      class: 'class-customer'
+      class: 'class-customer',
+      properties: {
+        allowResizing: 0,
+        isReadOnly: true,
+        headersVisibility: 1,
+        autoGenerateColumns: false,
+        allowSorting: false
+      }
     },
     {
       title: dataType.Order,
@@ -90,7 +104,14 @@ export class NorthwindTestComponent implements OnInit {
           format: 'n1'
         },
       ],
-      class: 'class-order'
+      class: 'class-order',
+      properties: {
+        allowResizing: 0,
+        isReadOnly: true,
+        headersVisibility: 1,
+        autoGenerateColumns: false,
+        allowSorting: false
+      }
     },
     {
       title: dataType.OrderDetail,
@@ -117,7 +138,14 @@ export class NorthwindTestComponent implements OnInit {
           width: 125
         }
       ],
-      class: 'class-detail'
+      class: 'class-detail',
+      properties: {
+        allowResizing: 0,
+        isReadOnly: true,
+        headersVisibility: 1,
+        autoGenerateColumns: false,
+        allowSorting: false
+      }
     }
   ]
 
@@ -125,11 +153,16 @@ export class NorthwindTestComponent implements OnInit {
 
   ngOnInit() { }
 
-  initialized(pGrid: wjcGrid.FlexGrid, title: string) {
-    pGrid.columnHeaders.rows.defaultSize = 20;
-    let grid = this.listGrid.find(grid => grid.title === title);
+  initialized(pGrid: wjcGrid.FlexGrid, pTitle: string) {
+    let grid = this.listGrid.find(grid => grid.title === pTitle);
+    pGrid.itemsSource = grid.source;
     if (grid) {
-      if (title === dataType.City) {
+      pGrid.initialize({
+        columns: grid.column,
+      })
+      // pGrid.allowResizing = grid.properties.allowResizing;
+      // pGrid.autoGenerateColumns = grid.properties.autoGenerateColumns;
+      if (pTitle === dataType.City) {
         this.callingApi = this._northwindService.getListCities().subscribe(
           data => {
             this.callingApi = null;
@@ -147,19 +180,16 @@ export class NorthwindTestComponent implements OnInit {
       pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
         let currentItem = pGrid.collectionView.currentItem;
         if (currentItem) {
-          if (title === dataType.City) { this.getDataFromServer(dataType.Customer, currentItem.city) }
-          if (title === dataType.Customer) { this.getDataFromServer(dataType.Order, currentItem.id) }
-          if (title === dataType.Order) { this.getDataFromServer(dataType.OrderDetail, currentItem.customerId, currentItem.id) }
+          if (pTitle === dataType.City) { this.getDataFromServer(dataType.Customer, currentItem.city) }
+          if (pTitle === dataType.Customer) { this.getDataFromServer(dataType.Order, currentItem.id) }
+          if (pTitle === dataType.Order) { this.getDataFromServer(dataType.OrderDetail, currentItem.customerId, currentItem.id) }
         }
-
-        pGrid.collectionView.currentChanged.addHandler((pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) => {
-          this.handleCurrentChaned(pGrid, pEvent, title);
-        })
+        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle))
       })
     }
   }
 
-  handleCurrentChaned(pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs, pType: string) {
+  handleCurrentChaned(pType: string, pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) {
     if (this.callingApi) { this.callingApi.unsubscribe(); }
     if (pGrid.currentItem) {
       switch (pType) {

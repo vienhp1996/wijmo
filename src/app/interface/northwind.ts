@@ -46,9 +46,15 @@ export interface Grid {
     title: string,
     source: Array<any>,
     column: Array<Column>,
-    class: string
+    class?: string,
+    properties?: {
+        allowResizing: number,
+        isReadOnly: boolean,
+        headersVisibility: number,
+        autoGenerateColumns: boolean,
+        allowSorting: boolean
+    }
 }
-
 
 export enum dataType {
     City = 'city',
