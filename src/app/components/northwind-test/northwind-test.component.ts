@@ -156,7 +156,10 @@ export class NorthwindTestComponent implements OnInit {
   initialized(pGrid: wjcGrid.FlexGrid, pTitle: string) {
     let grid = this.listGrid.find(grid => grid.title === pTitle);
     if (grid) {
-      pGrid.initialize({ columns: grid.column })
+      pGrid.initialize({
+        columns: grid.column,
+        itemsSource: grid.source
+      })
       if (grid?.properties) {
         pGrid.allowResizing = grid.properties.allowResizing;
         pGrid.allowSorting = grid.properties.allowSorting;
@@ -222,6 +225,8 @@ export class NorthwindTestComponent implements OnInit {
       if (index > -1) {
         if (pType === dataType.Customer) {
           this.listGrid[index].source = data;
+          console.log(this.listGrid);
+
           return;
         }
 

@@ -1,6 +1,6 @@
 <div class="north-container">
     <div *ngFor="let grid of listGrid" [class]="grid.class">
-        <wj-flex-grid #dgrid [itemsSource]="grid.source" (initialized)="initialized(dgrid, grid.title)">
+        <wj-flex-grid #dgrid (initialized)="initialized(dgrid, grid.title)">
         </wj-flex-grid>
     </div>
 </div>
