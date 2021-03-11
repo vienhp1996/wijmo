@@ -33,8 +33,6 @@ export class NorthwindService {
 
   getDataByType(pType: string, pId: string): Observable<any[]> {
     switch (pType) {
-      case dataType.City:
-        return this.getListCusomtersByCity(pId);
       case dataType.Customer:
         return this.getListCusomtersByCity(pId);
       case dataType.Order:

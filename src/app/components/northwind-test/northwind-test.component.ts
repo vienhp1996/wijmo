@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import * as wjcCore from '@grapecity/wijmo';
 import * as wjcGrid from '@grapecity/wijmo.grid';
 import { NorthwindService } from '../../services/northwind.service';
@@ -10,7 +10,7 @@ import { Customer, Order, OrderDetail, Grid, dataType } from '../../interface/no
   styleUrls: ['./northwind-test.component.scss']
 })
 
-export class NorthwindTestComponent implements OnInit {
+export class NorthwindTestComponent {
   callingApi;
   listGrid: Array<Grid> = [
     {
@@ -150,16 +150,10 @@ export class NorthwindTestComponent implements OnInit {
 
   constructor(private _northwindService: NorthwindService) { }
 
-  ngOnInit() { }
-
   initialized(pGrid: wjcGrid.FlexGrid, pTitle: string) {
     let grid = this.listGrid.find(grid => grid.title === pTitle);
     if (grid) {
-      pGrid.initialize({
-        columns: grid.column,
-        itemsSource: grid.source
-      })
-      pGrid.itemsSource = grid.source;
+      pGrid.initialize({ columns: grid.column })
       if (grid?.properties) {
         pGrid.allowResizing = grid.properties.allowResizing;
         pGrid.allowSorting = grid.properties.allowSorting;
