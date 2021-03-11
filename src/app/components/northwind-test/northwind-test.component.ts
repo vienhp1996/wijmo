@@ -19,7 +19,7 @@ export class NorthwindTestComponent {
       column: [
         {
           header: 'Thành phố',
-          binding: 'city',
+          binding: 'id',
           width: '*'
         }
       ],
@@ -30,7 +30,8 @@ export class NorthwindTestComponent {
         headersVisibility: 1,
         autoGenerateColumns: false,
         allowSorting: 0
-      }
+      },
+      child: dataType.Customer
     },
     {
       title: dataType.Customer,
@@ -75,7 +76,8 @@ export class NorthwindTestComponent {
         headersVisibility: 1,
         autoGenerateColumns: false,
         allowSorting: 0
-      }
+      },
+      child: dataType.Order
     },
     {
       title: dataType.Order,
@@ -110,7 +112,8 @@ export class NorthwindTestComponent {
         headersVisibility: 1,
         autoGenerateColumns: false,
         allowSorting: 0
-      }
+      },
+      child: dataType.OrderDetail
     },
     {
       title: dataType.OrderDetail,
@@ -166,9 +169,9 @@ export class NorthwindTestComponent {
           data => {
             this.callingApi = null;
             let respon: Array<Customer> = data['results'];
-            let list = [{ city: '' }];
+            let list = [{ id: '' }];
             for (let i = 0; i < respon.length; i++) {
-              if (!list.find(item => item.city === respon[i].city)) { list.push({ city: respon[i].city }) }
+              if (!list.find(item => item.id === respon[i].city)) { list.push({ id: respon[i].city }) }
             }
             pGrid.itemsSource = list;
           }
@@ -178,31 +181,22 @@ export class NorthwindTestComponent {
       pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
         let currentItem = pGrid.collectionView.currentItem;
         if (currentItem) {
-          if (pTitle === dataType.City) { this.getDataFromServer(dataType.Customer, currentItem.city) }
-          if (pTitle === dataType.Customer) { this.getDataFromServer(dataType.Order, currentItem.id) }
-          if (pTitle === dataType.Order) { this.getDataFromServer(dataType.OrderDetail, currentItem.customerId, currentItem.id) }
+          if (pTitle !== dataType.Order) { this.getDataFromServer(grid.child, currentItem.id) }
+          if (pTitle === dataType.Order) { this.getDataFromServer(grid.child, currentItem.customerId, currentItem.id) }
         }
-        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle))
+        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle, grid.child))
       })
     }
   }
 
-  handleCurrentChaned(pType: string, pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) {
+  handleCurrentChaned(pType: string, pChild: string, pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) {
     if (this.callingApi) { this.callingApi.unsubscribe(); }
     if (pGrid.currentItem) {
-      switch (pType) {
-        case dataType.City:
-          this.getDataFromServer(dataType.Customer, pGrid.currentItem.city);
-          break;
-
-        case dataType.Customer:
-          this.getDataFromServer(dataType.Order, pGrid.currentItem.id);
-          break;
-
-        case dataType.Order:
-          this.getDataFromServer(dataType.OrderDetail, pGrid.currentItem.customerId, pGrid.currentItem.id);
-          break;
+      if (pType === dataType.Order) {
+        this.getDataFromServer(pChild, pGrid.currentItem.customerId, pGrid.currentItem.id)
+        return;
       }
+      this.getDataFromServer(pChild, pGrid.currentItem.id)
     }
   }
 
@@ -215,39 +209,40 @@ export class NorthwindTestComponent {
         let element = document.getElementById(pType);
         let grid: any;
         if (element) { grid = wjcCore.Control.getControl(element); }
-
-        if (pType === dataType.Customer) {
-          grid.itemsSource = data;
-          return;
-        }
-
-        if (pType === dataType.Order) {
-          let listOrders: Array<Order> = [];
-          for (let i = 0; i < data.length; i++) {
-            data[i].order.orderDate = this.formatDateFromServer(data[i].order.orderDate);
-            listOrders.push(data[i].order);
+        if (grid) {
+          if (pType === dataType.Customer) {
+            grid.itemsSource = data;
+            return;
           }
-          grid.itemsSource = listOrders;
-          if (!listOrders.length) {
-            let childElement = document.getElementById(dataType.OrderDetail)
-            if (childElement) {
-              let childGrid: any = wjcCore.Control.getControl(childElement);
-              childGrid.itemsSource = [];
+
+          if (pType === dataType.Order) {
+            let listOrders: Array<Order> = [];
+            for (let i = 0; i < data.length; i++) {
+              data[i].order.orderDate = this.formatDateFromServer(data[i].order.orderDate);
+              listOrders.push(data[i].order);
+            }
+            grid.itemsSource = listOrders;
+            if (!listOrders.length) {
+              let childElement = document.getElementById(dataType.OrderDetail)
+              if (childElement) {
+                let childGrid: any = wjcCore.Control.getControl(childElement);
+                childGrid.itemsSource = [];
+              }
             }
             return;
           }
-        }
 
-        if (pType === dataType.OrderDetail) {
-          let listOrderDetail: Array<OrderDetail> = []
-          for (let i = 0; i < data.length; i++) {
-            for (let j = 0; j < data[i].orderDetails.length; j++) {
-              listOrderDetail.push(data[i].orderDetails[j]);
+          if (pType === dataType.OrderDetail) {
+            let listOrderDetail: Array<OrderDetail> = []
+            for (let i = 0; i < data.length; i++) {
+              for (let j = 0; j < data[i].orderDetails.length; j++) {
+                listOrderDetail.push(data[i].orderDetails[j]);
+              }
             }
+            let listDetail = listOrderDetail.filter((item: OrderDetail) => item.orderId === pAnotherId);
+            grid.itemsSource = listDetail;
+            return;
           }
-          let listDetail = listOrderDetail.filter((item: OrderDetail) => item.orderId === pAnotherId);
-          grid.itemsSource = listDetail;
-          return;
         }
       }
     })

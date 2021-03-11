@@ -54,6 +54,7 @@ export interface Grid {
         autoGenerateColumns: boolean,
         allowSorting: number
     }
+    child?: string
 }
 
 export enum dataType {
