@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as wjcCore from '@grapecity/wijmo';
 import * as wjcGrid from '@grapecity/wijmo.grid';
 import { NorthwindService } from '../../services/northwind.service';
@@ -11,7 +11,6 @@ import { Customer, Order, OrderDetail, Grid, dataType } from '../../interface/no
 })
 
 export class NorthwindTestComponent implements OnInit {
-  @ViewChild('dgrid', { static: false }) dgrid: wjcGrid.FlexGrid;
   callingApi;
   listGrid: Array<Grid> = [
     {
@@ -160,6 +159,7 @@ export class NorthwindTestComponent implements OnInit {
         columns: grid.column,
         itemsSource: grid.source
       })
+      pGrid.itemsSource = grid.source;
       if (grid?.properties) {
         pGrid.allowResizing = grid.properties.allowResizing;
         pGrid.allowSorting = grid.properties.allowSorting;
@@ -216,17 +216,14 @@ export class NorthwindTestComponent implements OnInit {
     this.callingApi = this._northwindService.getDataByType(pType, pId).subscribe((resp) => {
       this.callingApi = null;
       let data: Array<any> = resp['results'];
-      // console.log('pType', pType);
-      // console.log('pId', pId);
-      // console.log('data', data);
-      // console.log(pGrid);
-
       let index = this.listGrid.findIndex(grid => grid.title === pType);
       if (index > -1) {
-        if (pType === dataType.Customer) {
-          this.listGrid[index].source = data;
-          console.log(this.listGrid);
+        let element = document.getElementById(pType);
+        let grid: any;
+        if (element) { grid = wjcCore.Control.getControl(element); }
 
+        if (pType === dataType.Customer) {
+          grid.itemsSource = data;
           return;
         }
 
@@ -236,10 +233,13 @@ export class NorthwindTestComponent implements OnInit {
             data[i].order.orderDate = this.formatDateFromServer(data[i].order.orderDate);
             listOrders.push(data[i].order);
           }
-          this.listGrid[index].source = listOrders;
+          grid.itemsSource = listOrders;
           if (!listOrders.length) {
-            let indexDetail = this.listGrid.findIndex(grid => grid.title === dataType.OrderDetail);
-            this.listGrid[indexDetail].source = [];
+            let childElement = document.getElementById(dataType.OrderDetail)
+            if (childElement) {
+              let childGrid: any = wjcCore.Control.getControl(childElement);
+              childGrid.itemsSource = [];
+            }
             return;
           }
         }
@@ -252,7 +252,7 @@ export class NorthwindTestComponent implements OnInit {
             }
           }
           let listDetail = listOrderDetail.filter((item: OrderDetail) => item.orderId === pAnotherId);
-          this.listGrid[index].source = listDetail;
+          grid.itemsSource = listDetail;
           return;
         }
       }

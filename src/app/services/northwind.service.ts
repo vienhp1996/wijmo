@@ -18,12 +18,11 @@ export class NorthwindService {
   }
 
   getListCusomtersByCity(pCity): Observable<Customer[]> {
-    let url = '';
+    let url = `${this.customersUrl}`;
     if (pCity) {
       url = `${this.customersUrl}?City=${pCity}`
       return this.httpClient.get<any[]>(url);
     }
-    url = `${this.customersUrl}`;
     return this.httpClient.get<any[]>(url);
   }
 
