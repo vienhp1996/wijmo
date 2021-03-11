@@ -30,7 +30,7 @@ export class NorthwindTestComponent implements OnInit {
         isReadOnly: true,
         headersVisibility: 1,
         autoGenerateColumns: false,
-        allowSorting: false
+        allowSorting: 0
       }
     },
     {
@@ -75,7 +75,7 @@ export class NorthwindTestComponent implements OnInit {
         isReadOnly: true,
         headersVisibility: 1,
         autoGenerateColumns: false,
-        allowSorting: false
+        allowSorting: 0
       }
     },
     {
@@ -110,7 +110,7 @@ export class NorthwindTestComponent implements OnInit {
         isReadOnly: true,
         headersVisibility: 1,
         autoGenerateColumns: false,
-        allowSorting: false
+        allowSorting: 0
       }
     },
     {
@@ -144,7 +144,7 @@ export class NorthwindTestComponent implements OnInit {
         isReadOnly: true,
         headersVisibility: 1,
         autoGenerateColumns: false,
-        allowSorting: false
+        allowSorting: 0
       }
     }
   ]
@@ -155,24 +155,25 @@ export class NorthwindTestComponent implements OnInit {
 
   initialized(pGrid: wjcGrid.FlexGrid, pTitle: string) {
     let grid = this.listGrid.find(grid => grid.title === pTitle);
-    pGrid.itemsSource = grid.source;
     if (grid) {
-      pGrid.initialize({
-        columns: grid.column,
-      })
-      // pGrid.allowResizing = grid.properties.allowResizing;
-      // pGrid.autoGenerateColumns = grid.properties.autoGenerateColumns;
+      pGrid.initialize({ columns: grid.column })
+      if (grid?.properties) {
+        pGrid.allowResizing = grid.properties.allowResizing;
+        pGrid.allowSorting = grid.properties.allowSorting;
+        pGrid.isReadOnly = grid.properties.isReadOnly;
+        pGrid.headersVisibility = grid.properties.headersVisibility;
+        pGrid.autoGenerateColumns = grid.properties.autoGenerateColumns;
+      }
       if (pTitle === dataType.City) {
         this.callingApi = this._northwindService.getListCities().subscribe(
           data => {
             this.callingApi = null;
             let respon: Array<Customer> = data['results'];
-            let unique = [...new Set(respon.map((item: Customer) => item.city))];
             let list = [{ city: '' }];
-            for (let i = 0; i < unique.length; i++) {
-              list.push({ city: unique[i] })
+            for (let i = 0; i < respon.length; i++) {
+              if (!list.find(item => item.city === respon[i].city)) { list.push({ city: respon[i].city }) }
             }
-            grid.source = list;
+            pGrid.itemsSource = list;
           }
         );
       }
@@ -212,6 +213,11 @@ export class NorthwindTestComponent implements OnInit {
     this.callingApi = this._northwindService.getDataByType(pType, pId).subscribe((resp) => {
       this.callingApi = null;
       let data: Array<any> = resp['results'];
+      // console.log('pType', pType);
+      // console.log('pId', pId);
+      // console.log('data', data);
+      // console.log(pGrid);
+
       let index = this.listGrid.findIndex(grid => grid.title === pType);
       if (index > -1) {
         if (pType === dataType.Customer) {

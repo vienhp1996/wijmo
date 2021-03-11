@@ -52,7 +52,7 @@ export interface Grid {
         isReadOnly: boolean,
         headersVisibility: number,
         autoGenerateColumns: boolean,
-        allowSorting: boolean
+        allowSorting: number
     }
 }
 
