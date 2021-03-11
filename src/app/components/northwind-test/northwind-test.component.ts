@@ -178,14 +178,16 @@ export class NorthwindTestComponent {
         );
       }
 
-      pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
-        let currentItem = pGrid.collectionView.currentItem;
-        if (currentItem) {
-          if (pTitle !== dataType.Order) { this.getDataFromServer(grid.child, currentItem.id) }
-          if (pTitle === dataType.Order) { this.getDataFromServer(grid.child, currentItem.customerId, currentItem.id) }
-        }
-        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle, grid.child))
-      })
+      if (grid.title !== dataType.OrderDetail) {
+        pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
+          let currentItem = pGrid.collectionView.currentItem;
+          if (currentItem) {
+            if (pTitle !== dataType.Order) { this.getDataFromServer(grid.child, currentItem.id) }
+            if (pTitle === dataType.Order) { this.getDataFromServer(grid.child, currentItem.customerId, currentItem.id) }
+          }
+          pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle, grid.child))
+        })
+      }
     }
   }
 
