@@ -44,7 +44,6 @@ export interface Column {
 
 export interface Grid {
     title: string,
-    source: Array<any>,
     column: Array<Column>,
     class?: string,
     properties?: {

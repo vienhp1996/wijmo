@@ -15,7 +15,6 @@ export class NorthwindTestComponent {
   listGrid: Array<Grid> = [
     {
       title: dataType.City,
-      source: [],
       column: [
         {
           header: 'Thành phố',
@@ -35,7 +34,6 @@ export class NorthwindTestComponent {
     },
     {
       title: dataType.Customer,
-      source: [],
       column: [
         {
           header: 'Id',
@@ -81,7 +79,6 @@ export class NorthwindTestComponent {
     },
     {
       title: dataType.Order,
-      source: [],
       column: [
         {
           header: 'Id',
@@ -117,7 +114,6 @@ export class NorthwindTestComponent {
     },
     {
       title: dataType.OrderDetail,
-      source: [],
       column: [
         {
           header: 'Id',
@@ -178,31 +174,29 @@ export class NorthwindTestComponent {
         );
       }
 
-      if (grid.title !== dataType.OrderDetail) {
-        pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
-          let currentItem = pGrid.collectionView.currentItem;
-          if (currentItem) {
-            if (pTitle !== dataType.Order) { this.getDataFromServer(grid.child, currentItem.id) }
-            if (pTitle === dataType.Order) { this.getDataFromServer(grid.child, currentItem.customerId, currentItem.id) }
-          }
-          pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, pTitle, grid.child))
-        })
-      }
+      pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
+        let currentItem = pGrid.collectionView.currentItem;
+        if (currentItem && grid.child) { this.getDataFromServer(grid.child, currentItem.id) }
+        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, grid.child))
+      })
     }
   }
 
-  handleCurrentChaned(pType: string, pChild: string, pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) {
+  handleCurrentChaned(pChild: string, pGrid: wjcCore.CollectionView, pEvent: wjcCore.EventArgs) {
     if (this.callingApi) { this.callingApi.unsubscribe(); }
-    if (pGrid.currentItem) {
-      if (pType === dataType.Order) {
-        this.getDataFromServer(pChild, pGrid.currentItem.customerId, pGrid.currentItem.id)
-        return;
-      }
-      this.getDataFromServer(pChild, pGrid.currentItem.id)
-    }
+    if (pGrid.currentItem) { this.getDataFromServer(pChild, pGrid.currentItem.id) }
   }
 
-  getDataFromServer(pType: string, pId: any, pAnotherId?: string) {
+  getDataFromServer(pType: string, pId: any) {
+    let orderId;
+    if (pType === dataType.OrderDetail) {
+      let parentElement = document.getElementById(dataType.Order)
+      if (parentElement) {
+        let parentGrid: any = wjcCore.Control.getControl(parentElement);
+        pId = parentGrid.collectionView.currentItem.customerId;
+        orderId = parentGrid.collectionView.currentItem.id;
+      }
+    }
     this.callingApi = this._northwindService.getDataByType(pType, pId).subscribe((resp) => {
       this.callingApi = null;
       let data: Array<any> = resp['results'];
@@ -241,7 +235,7 @@ export class NorthwindTestComponent {
                 listOrderDetail.push(data[i].orderDetails[j]);
               }
             }
-            let listDetail = listOrderDetail.filter((item: OrderDetail) => item.orderId === pAnotherId);
+            let listDetail = listOrderDetail.filter((item: OrderDetail) => item.orderId === orderId);
             grid.itemsSource = listDetail;
             return;
           }
@@ -258,8 +252,6 @@ export class NorthwindTestComponent {
     return null
   }
 
-  ngOnDestroy(): void {
-    this.callingApi.unsubscribe();
-  }
+  ngOnDestroy(): void { this.callingApi.unsubscribe(); }
 
 }
