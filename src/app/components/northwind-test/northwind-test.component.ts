@@ -160,6 +160,7 @@ export class NorthwindTestComponent {
         pGrid.headersVisibility = grid.properties.headersVisibility;
         pGrid.autoGenerateColumns = grid.properties.autoGenerateColumns;
       }
+
       if (pTitle === dataType.City) {
         this.callingApi = this._northwindService.getListCities().subscribe(
           data => {
@@ -177,8 +178,8 @@ export class NorthwindTestComponent {
       pGrid.itemsSourceChanged.addHandler((pGrid: wjcGrid.FlexGrid, pEvent: wjcCore.EventArgs) => {
         let currentItem = pGrid.collectionView.currentItem;
         if (currentItem && grid.child) { this.getDataFromServer(grid.child, currentItem.id) }
-        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, grid.child))
-      })
+        pGrid.collectionView.currentChanged.addHandler(this.handleCurrentChaned.bind(this, grid.child), this)
+      }, this)
     }
   }
 
@@ -190,21 +191,19 @@ export class NorthwindTestComponent {
   getDataFromServer(pType: string, pId: any) {
     let orderId;
     if (pType === dataType.OrderDetail) {
-      let parentElement = document.getElementById(dataType.Order)
-      if (parentElement) {
-        let parentGrid: any = wjcCore.Control.getControl(parentElement);
+      let parentGrid: any = wjcCore.Control.getControl(`#${dataType.Order}`);
+      if (parentGrid) {
         pId = parentGrid.collectionView.currentItem.customerId;
         orderId = parentGrid.collectionView.currentItem.id;
       }
     }
+
     this.callingApi = this._northwindService.getDataByType(pType, pId).subscribe((resp) => {
       this.callingApi = null;
       let data: Array<any> = resp['results'];
       let index = this.listGrid.findIndex(grid => grid.title === pType);
       if (index > -1) {
-        let element = document.getElementById(pType);
-        let grid: any;
-        if (element) { grid = wjcCore.Control.getControl(element); }
+        let grid: any = wjcCore.Control.getControl(`#${pType}`);
         if (grid) {
           if (pType === dataType.Customer) {
             grid.itemsSource = data;
@@ -219,11 +218,8 @@ export class NorthwindTestComponent {
             }
             grid.itemsSource = listOrders;
             if (!listOrders.length) {
-              let childElement = document.getElementById(dataType.OrderDetail)
-              if (childElement) {
-                let childGrid: any = wjcCore.Control.getControl(childElement);
-                childGrid.itemsSource = [];
-              }
+              let childGrid: any = wjcCore.Control.getControl(`#${dataType.OrderDetail}`);
+              if (childGrid) { childGrid.itemsSource = []; }
             }
             return;
           }
@@ -252,6 +248,12 @@ export class NorthwindTestComponent {
     return null
   }
 
-  ngOnDestroy(): void { this.callingApi.unsubscribe(); }
-
+  ngOnDestroy(): void {
+    this.callingApi.unsubscribe();
+    for (let i = 0; i < this.listGrid.length; i++) {
+      let grid: any = wjcCore.Control.getControl(`#${this.listGrid[i].title}`);
+      grid.itemsSourceChanged.removeHandler(null, this);
+      grid.collectionView.currentChanged.removeHandler(null, this);
+    }
+  }
 }
