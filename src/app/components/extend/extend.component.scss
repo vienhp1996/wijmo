@@ -1,0 +1,8 @@
+.grid-container{
+    height: 100%;
+    display: flex;
+    overflow: auto;
+    .grid{
+        height: 99%;
+    }
+}

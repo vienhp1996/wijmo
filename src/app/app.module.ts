@@ -17,6 +17,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NorthwindComponent } from './components/northwind/northwind.component';
 import { TriningComponent } from './components/trining/trining.component';
 import { NorthwindTestComponent } from './components/northwind-test/northwind-test.component';
+import { MyGrid } from './components/extend/extend.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,6 +30,7 @@ import { NorthwindTestComponent } from './components/northwind-test/northwind-te
     NorthwindComponent,
     TriningComponent,
     NorthwindTestComponent,
+    MyGrid
   ],
   imports: [BrowserModule, ReactiveFormsModule, WjGridModule, WjChartModule, WjGridSearchModule, HttpClientModule, WjInputModule],
   providers: [HttpClientModule],
