@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, Injectable, Injector, Optional, SkipSelf } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, Injector, Optional, SkipSelf } from '@angular/core';
 import * as wjcCore from '@grapecity/wijmo';
 import * as wjcGrid from '@grapecity/wijmo.grid';
 import { WjFlexGrid, wjFlexGridMeta } from '@grapecity/wijmo.angular2.grid';
-import { Customer, Order, OrderDetail, Grid, dataType } from '../../interface/northwind'
+import { Customer, dataType } from '../../interface/northwind'
 import { NorthwindService } from '../../services/northwind.service';
+import { CustomMergeManager } from './CustomMergeManager';
 
 @Component({
   selector: 'app-extend',
@@ -14,7 +15,6 @@ import { NorthwindService } from '../../services/northwind.service';
     ...wjFlexGridMeta.providers
   ]
 })
-@Injectable()
 export class MyGrid extends WjFlexGrid {
   grid = {
     title: dataType.Customer,
@@ -22,28 +22,32 @@ export class MyGrid extends WjFlexGrid {
       {
         header: 'Id',
         binding: 'id',
-        width: 100
+        width: 150
       },
       {
         header: 'Tên liên lạc',
         binding: 'contactName',
-        width: '*'
+        width: 250
       },
       {
         header: 'Thông tin liên lạc',
         binding: 'contactTitle',
+        width: 250
       },
       {
         header: 'Tên công ty',
         binding: 'companyName',
+        width: '*'
       },
       {
         header: 'Thành phố',
         binding: 'city',
+        width: 150
       },
       {
         header: 'Địa chỉ',
         binding: 'address',
+        width: 150
       },
       {
         header: 'Số ĐT',
@@ -71,16 +75,26 @@ export class MyGrid extends WjFlexGrid {
       data => {
         this.callingApi = null;
         let respon: Array<Customer> = data['results'];
-        this.autoGenerateColumns = false;
         this.initialize({ columns: this.grid.column })
+        this.autoGenerateColumns = this.grid.properties.autoGenerateColumns;
         this.itemsSource = respon;
-        this.isReadOnly = true;
-        console.log(this);
+        this.isReadOnly = this.grid.properties.isReadOnly;
+        this.headersVisibility = this.grid.properties.headersVisibility;
+        // console.log(this);
+        this.mergeManager = new CustomMergeManager(this)
       }
     );
   }
 
-  ngOnInit() {
+  onResizingColumn(pEvent: wjcGrid.CellRangeEventArgs): boolean {
+    if (pEvent.col === 1) {
+      pEvent.cancel = true;
+      return false;
+    }
+    return true;
   }
 
+  onResizedColumn(pEvent: wjcGrid.CellRangeEventArgs) {
+    console.log('resized');
+  }
 }
