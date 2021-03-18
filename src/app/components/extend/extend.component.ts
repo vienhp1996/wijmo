@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, forwardRef, Inject, Injector, Optional, SkipSelf } from '@angular/core';
 import * as wjcCore from '@grapecity/wijmo';
 import * as wjcGrid from '@grapecity/wijmo.grid';
+import * as input from '@grapecity/wijmo.input';
 import { WjFlexGrid, wjFlexGridMeta } from '@grapecity/wijmo.angular2.grid';
 import { Customer, dataType } from '../../interface/northwind'
 import { NorthwindService } from '../../services/northwind.service';
@@ -10,12 +11,11 @@ import { NorthwindService } from '../../services/northwind.service';
   templateUrl: './extend.component.html',
   styleUrls: ['./extend.component.scss'],
   providers: [
-    { provide: 'WjComponent', useExisting: forwardRef(() => MyGrid) },
-    ...wjFlexGridMeta.providers
+    { provide: 'WjComponent', useExisting: forwardRef(() => MyGrid) }
   ]
 })
 
-export class MyGrid extends WjFlexGrid {
+export class MyGrid extends wjcGrid.FlexGrid {
   grid = {
     title: dataType.Customer,
     column: [
@@ -66,26 +66,24 @@ export class MyGrid extends WjFlexGrid {
   }
   callingApi;
 
-  constructor(@Inject(ElementRef) elRef: ElementRef,
-    @Inject(Injector) injector: Injector,
-    @Inject('WjComponent') @SkipSelf() @Optional() parentCmp: any,
-    @Inject(ChangeDetectorRef) cdRef: ChangeDetectorRef, private _northwindService: NorthwindService) {
-    super(elRef, injector, parentCmp, cdRef);
+  constructor(element: HTMLElement) {
+    super(element);
 
-    this.callingApi = this._northwindService.getListCities().subscribe(
-      data => {
-        this.callingApi = null;
-        let response: Array<Customer> = data['results'];
-        this.initialize({ columns: this.grid.column })
-        if (this.grid.properties) {
-          this.autoGenerateColumns = this.grid.properties.autoGenerateColumns;
-          this.isReadOnly = this.grid.properties.isReadOnly;
-          this.headersVisibility = this.grid.properties.headersVisibility;
-        }
-        this.itemsSource = response;
-        this.formatItem.addHandler(this.centerCell.bind(null));
-      }
-    );
+    // this.callingApi = this._northwindService.getListCities().subscribe(
+    //   data => {
+    //     this.callingApi = null;
+    //     let response: Array<Customer> = data['results'];
+    //     this.initialize({ columns: this.grid.column })
+    //     if (this.grid.properties) {
+    //       this.autoGenerateColumns = this.grid.properties.autoGenerateColumns;
+    //       this.isReadOnly = this.grid.properties.isReadOnly;
+    //       this.headersVisibility = this.grid.properties.headersVisibility;
+    //     }
+    //     this.itemsSource = response;
+    //     this.formatItem.addHandler(this.centerCell.bind(null));
+    //   }
+    // );
+    // initialize control options
   }
 
   onResizingColumn(pEvent: wjcGrid.CellRangeEventArgs): boolean {
