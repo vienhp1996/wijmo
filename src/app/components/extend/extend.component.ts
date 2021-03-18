@@ -4,7 +4,6 @@ import * as wjcGrid from '@grapecity/wijmo.grid';
 import { WjFlexGrid, wjFlexGridMeta } from '@grapecity/wijmo.angular2.grid';
 import { Customer, dataType } from '../../interface/northwind'
 import { NorthwindService } from '../../services/northwind.service';
-import { CustomMergeManager } from './CustomMergeManager';
 
 @Component({
   selector: 'app-extend',
@@ -15,6 +14,7 @@ import { CustomMergeManager } from './CustomMergeManager';
     ...wjFlexGridMeta.providers
   ]
 })
+
 export class MyGrid extends WjFlexGrid {
   grid = {
     title: dataType.Customer,
@@ -71,22 +71,25 @@ export class MyGrid extends WjFlexGrid {
     @Inject('WjComponent') @SkipSelf() @Optional() parentCmp: any,
     @Inject(ChangeDetectorRef) cdRef: ChangeDetectorRef, private _northwindService: NorthwindService) {
     super(elRef, injector, parentCmp, cdRef);
+
     this.callingApi = this._northwindService.getListCities().subscribe(
       data => {
         this.callingApi = null;
-        let respon: Array<Customer> = data['results'];
+        let response: Array<Customer> = data['results'];
         this.initialize({ columns: this.grid.column })
-        this.autoGenerateColumns = this.grid.properties.autoGenerateColumns;
-        this.itemsSource = respon;
-        this.isReadOnly = this.grid.properties.isReadOnly;
-        this.headersVisibility = this.grid.properties.headersVisibility;
-        // console.log(this);
-        this.mergeManager = new CustomMergeManager(this)
+        if (this.grid.properties) {
+          this.autoGenerateColumns = this.grid.properties.autoGenerateColumns;
+          this.isReadOnly = this.grid.properties.isReadOnly;
+          this.headersVisibility = this.grid.properties.headersVisibility;
+        }
+        this.itemsSource = response;
+        this.formatItem.addHandler(this.centerCell.bind(null));
       }
     );
   }
 
   onResizingColumn(pEvent: wjcGrid.CellRangeEventArgs): boolean {
+    super.onResizingColumn(pEvent);
     if (pEvent.col === 1) {
       pEvent.cancel = true;
       return false;
@@ -97,4 +100,44 @@ export class MyGrid extends WjFlexGrid {
   onResizedColumn(pEvent: wjcGrid.CellRangeEventArgs) {
     console.log('resized');
   }
+
+  getMergedRange(panel: wjcGrid.GridPanel, r: number, c: number, clip = true): wjcGrid.CellRange {
+    // create basic cell range
+    var rg = new wjcGrid.CellRange(r, c);
+
+    // expand left/right
+    for (var i = rg.col; i < panel.columns.length - 1; i++) {
+      if (panel.getCellData(rg.row, i, true) != panel.getCellData(rg.row, i + 1, true)) break;
+      rg.col2 = i + 1;
+    }
+    for (var i = rg.col; i > 0; i--) {
+      if (panel.getCellData(rg.row, i, true) != panel.getCellData(rg.row, i - 1, true)) break;
+      rg.col = i - 1;
+    }
+
+    // expand up/down
+    for (var i = rg.row; i < panel.rows.length - 1; i++) {
+      if (panel.getCellData(i, rg.col, true) != panel.getCellData(i + 1, rg.col, true)) break;
+      rg.row2 = i + 1;
+    }
+    for (var i = rg.row; i > 0; i--) {
+      if (panel.getCellData(i, rg.col, true) != panel.getCellData(i - 1, rg.col, true)) break;
+      rg.row = i - 1;
+    }
+    return rg;
+  }
+
+  centerCell(pGrid: wjcGrid.FlexGrid, pEvent: wjcGrid.FormatItemEventArgs) {
+    if (!pEvent.range.isSingleCell) {
+      pEvent.cell.innerHTML = '<div>' + pEvent.cell.innerHTML + '</div>';
+      wjcCore.setCss(pEvent.cell, { display: 'table' });
+      wjcCore.setCss(pEvent.cell.children[0], {
+        display: 'table-cell',
+        textAlign: 'center',
+        verticalAlign: 'middle'
+      });
+    }
+  }
 }
+
+

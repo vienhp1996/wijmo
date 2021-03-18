@@ -1,7 +1,6 @@
 import * as wjcGrid from '@grapecity/wijmo.grid';
 
 export class CustomMergeManager extends wjcGrid.MergeManager {
-
     getMergedRange(panel: wjcGrid.GridPanel, r: number, c: number, clip = true): wjcGrid.CellRange {
         // create basic cell range
         var rg = new wjcGrid.CellRange(r, c);
@@ -25,8 +24,6 @@ export class CustomMergeManager extends wjcGrid.MergeManager {
             if (panel.getCellData(i, rg.col, true) != panel.getCellData(i - 1, rg.col, true)) break;
             rg.row = i - 1;
         }
-        // done
         return rg;
     }
-
 }
